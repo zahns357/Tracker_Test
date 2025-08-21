@@ -3,22 +3,39 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Task Tracker with Auto-Save & Pulse</title>
+  <title>Sun and Moon To Do List...</title>
   <style>
     body { font-family: Arial, sans-serif; max-width: 600px; margin: 20px auto; }
     .container { padding: 10px; }
     button { margin: 2px; }
-    pre { background: #f0f0f0; padding: 10px; height: 150px; overflow-y: auto; }
     input { margin: 0 5px 5px 0; }
+    pre { background: #f6f7f1; padding: 10px; height: 150px; overflow-y: auto; }
+
+    .medications-buttons {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      max-width: 150px;
+    }
+
+    .medications-buttons button {
+      width: 100%;
+    }
+
+    .clicked {
+      background-color: #4CAF50 !important;
+      color: rgb(246, 250, 33) !important;
+    }
   </style>
 </head>
 <body>
   <div class="container">
-    <h1>Task Tracker</h1>
+    
+    <h1>Sun and Moon Tracker and To Do List</h1>
     <ul id="tasks">
       <li>
         Medications
-        <div>
+        <div class="medications-buttons">
           <button class="track-btn" data-category="Medications" data-task="Morning">Morning</button>
           <button class="track-btn" data-category="Medications" data-task="Afternoon">Afternoon</button>
           <button class="track-btn" data-category="Medications" data-task="Evening">Evening</button>
@@ -65,132 +82,21 @@
           <button class="track-btn" data-category="Chores" data-task="Birds">Birds</button>
           <button class="track-btn" data-category="Chores" data-task="Fish">Fish</button>
           <button class="track-btn" data-category="Chores" data-task="Chickens">Chickens</button>
+          <button class="track-btn" data-category="Chores" data-task="Bunnies">Cows</button> 
           <button class="track-btn" data-category="Chores" data-task="Goats">Goats</button>
-          <button class="track-btn" data-category="Chores" data-task="Clean">Clean</button>
+          <button class="track-btn" data-category="Chores" data-task="Clean">Pay Bills</button>
+          <button class="track-btn" data-category="Chores" data-task="Laundry">Laundry</button>
+          <button class="track-btn" data-category="Chores" data-task="Dishes"> Dishes</button>
+          <button class="track-btn" data-category="Chores" data-task="Trash"> Trash</button>
         </div>
       </li>
     </ul>
-
-    <h2>Log</h2>
-    <pre id="log"></pre>
+    <img src="logo.jpg" alt="Task Tracker Icon" width="200" />
     <button onclick="downloadCSV()">Download CSV</button>
-    <button onclick="clearLogs()">Clear Logs</button>
+    <button onclick="resetButtons()">Reset Buttons</button>
   </div>
 
-<script>
-  const logElement = document.getElementById('log');
-  const STORAGE_KEY = 'taskTrackerLogs';
-  let logEntries = [];
-
-  // Load logs from localStorage
-  function loadLogs() {
-    const saved = localStorage.getItem(STORAGE_KEY);
-    if (saved) {
-      logEntries = JSON.parse(saved);
-      logEntries.forEach(entry => {
-        logElement.textContent += formatLogEntry(entry) + '\n';
-      });
-    }
-  }
-
-  // Save logs to localStorage
-  function saveLogs() {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(logEntries));
-  }
-
-  // Format a single log entry for display
-  function formatLogEntry(entry) {
-    return `[${entry.timestamp}] ${entry.category} - ${entry.task}: ${entry.value}`;
-  }
-
-  // Add a log entry (and update display + storage)
-  function addLogEntry(category, task, value) {
-    const timestamp = new Date().toLocaleString();
-    const entry = { timestamp, category, task, value };
-    logEntries.push(entry);
-    logElement.textContent += formatLogEntry(entry) + '\n';
-    saveLogs();
-  }
-
-  // Setup buttons with data attributes for tracking
-  document.querySelectorAll('.track-btn').forEach(button => {
-    button.addEventListener('click', () => {
-      const category = button.getAttribute('data-category');
-      const task = button.getAttribute('data-task');
-      addLogEntry(category, task, 1);
-    });
-  });
-
-  // Record Blood Pressure input
-  function recordBP() {
-    const sys = document.getElementById('systolic').value.trim();
-    const dia = document.getElementById('diastolic').value.trim();
-    if (sys && dia) {
-      addLogEntry('Blood Pressure', 'Check', `${sys}/${dia}`);
-      document.getElementById('systolic').value = '';
-      document.getElementById('diastolic').value = '';
-    } else {
-      alert('Please fill both systolic and diastolic values.');
-    }
-  }
-
-  // Record Pulse input
-  function recordPulse() {
-    const pulse = document.getElementById('pulse').value.trim();
-    if (pulse) {
-      addLogEntry('Pulse', 'Measurement', pulse);
-      document.getElementById('pulse').value = '';
-    } else {
-      alert('Please enter a pulse value.');
-    }
-  }
-
-  // Record Oxygen Level input
-  function recordOxygen() {
-    const oxygen = document.getElementById('oxygen').value.trim();
-    if (oxygen) {
-      addLogEntry('Oxygen Saturation', 'Level', `${oxygen}%`);
-      document.getElementById('oxygen').value = '';
-    } else {
-      alert('Please enter an oxygen level.');
-    }
-  }
-
-  // Download CSV file
-  function downloadCSV() {
-    let csvContent = "data:text/csv;charset=utf-8,";
-    csvContent += "Timestamp,Category,Task,Value\n";
-    logEntries.forEach(entry => {
-      const row = [
-        `"${entry.timestamp}"`,
-        `"${entry.category}"`,
-        `"${entry.task}"`,
-        `"${entry.value}"`
-      ].join(",");
-      csvContent += row + "\n";
-    });
-
-    const encodedUri = encodeURI(csvContent);
-    const link = document.createElement('a');
-    link.setAttribute('href', encodedUri);
-    link.setAttribute('download', 'task_log.csv');
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-  }
-
-  // Clear logs and localStorage
-  function clearLogs() {
-    if (confirm('Are you sure you want to clear all logs?')) {
-      logEntries = [];
-      logElement.textContent = '';
-      localStorage.removeItem(STORAGE_KEY);
-    }
-  }
-
-  // Initialize
-  loadLogs();
-
-</script>
+  <!-- Link external JavaScript file -->
+  <script src="task-tracker.js"></script>
 </body>
 </html>
